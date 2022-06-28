@@ -1,4 +1,4 @@
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
@@ -38,6 +38,29 @@ Send, ^!b
 return
 #+a::
 Send, ^!a
+return
+
+;englesh symbol style
+`::
+Send {Asc 096} ;output `~
+return
+/::
+Send {Asc 047} ;output /
+return
+!/::
+Send 、
+return
+]::
+Send {Asc 093} ;output ]
+return
+[::
+Send {Asc 091} ;output [
+return
+\::
+Send {Asc 092} ;output \
+return
+$::
+Send {Asc 036} ;output $
 return
 
 ;typora

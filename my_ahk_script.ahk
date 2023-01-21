@@ -5,32 +5,30 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 #SingleInstance Force
 
-#Persistent                                           ; 使脚本永久运行
-previousExe := ""                                     ; 自定义一个变量，用于存储上一个活动窗口的 ProcessName
-SetTimer, isActive, 500                               ; 每 0.5 秒执行一次 isActive 标签下的内容
+#Persistent ; Ensures that the script will continue to run in the background after the initial hotkey is pressed.
+previousExe := "" ; Stores the name of the previous executable that was launched.
+SetTimer, isActive, 500 ; Checks if the previous executable is still running every 500 milliseconds.
 return
 isActive:
-{
-    WinGET, currentExe, ProcessName, A                ; 使用 WinGet 函数，获取当前活动窗口的 ProcessName，存储在 currentExe 变量中
-    if (currentExe = "cmd.exe")           ; 如果当前活动窗口是 WindowsTerminal，则执行的代码
     {
-        if (currentExe != previousExe)                
+        WinGET, currentExe, ProcessName, A ; 
+        if (currentExe = "Termius.exe"||currentExe="windowdtermianl.exe")
         {
-            PostMessage, 0x0050, 0, 0x00000409, , A   ; 切换为美式键盘
+            if (currentExe != previousExe) 
+            {
+                PostMessage, 0x0050, 0, 0x00000409, , A ; ENG keyborad
+                previousExe := currentExe
+                return
+            } else 
+            {
+                return
+            }
+        } else ; save the currentExe to previousExe
+        {
             previousExe := currentExe
             return
-        } else 
-        {
-            return
         }
-    } else                                            ; 如果当前活动窗口不是 WindowsTerminal，则执行的代码
-    {
-        previousExe := currentExe
-        return
     }
-}
-
-
 
 ~Esc & a::
     ;open explorer.exe
@@ -52,55 +50,34 @@ return
 
 return
 
-;pin window on top
-#w:: 
-    Send, !+z
-return
+
+; #+w:: 
+;     WinGetPos, X, Y, W, H, A
+;     MsgBox, The window is at %X%`,%Y% and its size is %W%x%H%
+; return
+
 #q:: 
     Send, !+a
 return
 
-;ocr
-#z::
-    Send, ^!o
+;alt
+!.::
+    Send, 2013599_���ҵ
 return
 
 ;snip
 #+a::
-    Send, ^!b
-return
-#a::
-    Send, ^!q
-return
-#+s::
     Send, ^+a
 return
-
-; ;englesh symbol style
-; `::
-;     Send {Asc 096} ;output `~
-; return
-; /::
-;     Send {Asc 047} ;output /
-; return
-; !/::
-;     Send 、
-; return
-; ]::
-;     Send {Asc 093} ;output ]
-; return
-; [::
-;     Send {Asc 091} ;output [
-; return
-; \::
-;     Send {Asc 092} ;output \
-; return
-; $::
-;     Send {Asc 036} ;output $
-; return
-
-; Global bad environment settings ; {{{1
-
+#a::
+    Send, ^!b
+return
+#z::
+    Send, ^!o
+return
+#+s::
+    Send, ^!a
+return
 ; The following environment parameters must be set, Otherwise, the shortcut key setting is invalid
 #UseHook On
 Setkeydelay, -1
@@ -110,7 +87,7 @@ ime_us_cn_point := 0
 
 GetIME() ; {{{1
 { ; Gets the active ime language layout of the current window ID Interface, This interface is one of the few interfaces that can correctly query the input method language status
-    return DllCall("GetKeyboardLayout", "UInt", DllCall("GetWindowThreadProcessId", "UInt", WinActive("A"), "UInt", 0), "UInt")
+return DllCall("GetKeyboardLayout", "UInt", DllCall("GetWindowThreadProcessId", "UInt", WinActive("A"), "UInt", 0), "UInt")
 }
 
 SwitchIME() ; {{{1
@@ -167,34 +144,71 @@ Shift::SwitchIME() ; realization Shift Key switching Chinese and English input m
         #3::addFontColor("cornflowerblue")
         #4::addFontColor("cyan") 
         #5::addFontColor("purple")
+        !1::sendctrl(1)
+        !2::sendctrl(2)
+        !3::sendctrl(3)
+        !4::sendctrl(4)
+        !5::sendctrl(5)
+        !6::sendctrl(6)
         Esc & q up::addCodeshell()
         Esc & w::addTitle()
+        Esc & e::addTitle6()
 
     }
-    addFontColor(color){
-        clipboard := "" 
-        Send {ctrl down}c{ctrl up} 
-        ; SendInput {Text} 
-        SendInput {TEXT}<font color='%color%'>
-        SendInput {ctrl down}v{ctrl up}
-        If(clipboard = ""){
-            SendInput {TEXT}</font>
-        }else{
-            SendInput {TEXT}</ 
+
+    #IfWinActive ahk_exe Termius.exe
+        {
+
+            Esc & q up::qqq()
+            Esc & w::wwwqqq()
+
         }
-    }
-    addCodeshell(){
-        Sleep 30
-        Send,{Asc 096}
-        Send,{Asc 096}
-        Send,{Asc 096}
-        Send,shell
-        Send,{Enter}
-        Return
-    } 
 
-    addTitle(){
-        Send, ^5
-        Return
-    } 
+        qqq()
+        {
+            Send, :q
+            return
+        }
 
+        wwwqqq()
+        {
+            Send, :wq
+            return
+        }
+
+        addFontColor(color){
+            clipboard := "" 
+            Send {ctrl down}c{ctrl up} 
+            ; SendInput {Text} 
+            SendInput {TEXT}<font color='%color%'>
+            SendInput {ctrl down}v{ctrl up}
+            If(clipboard = ""){
+                SendInput {TEXT}</font>
+            }else{
+                SendInput {TEXT}</ 
+            }
+        }
+        addCodeshell(){
+            Sleep 30
+            Send,{Asc 096}
+            Send,{Asc 096}
+            Send,{Asc 096}
+            Send,sql
+            Send,{Enter}
+            Return
+        } 
+
+        addTitle(){
+            Send, ^5
+            Return
+        } 
+
+        sendctrl(num){
+            Send, ^%num%
+            Return
+        }
+
+        addTitle6(){
+            Send, ^6
+            Return
+        }

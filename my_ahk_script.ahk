@@ -11,15 +11,15 @@ SetTimer, isActive, 500 ; Checks if the previous executable is still running eve
 return
 isActive:
     {
-        WinGET, currentExe, ProcessName, A ; 
-        if (currentExe = "Termius.exe"||currentExe="windowdtermianl.exe")
+        WinGET, currentExe, ProcessName, A ;
+        if (currentExe = "cmd.exe"||currentExe="WindowsTerminal.exe")
         {
-            if (currentExe != previousExe) 
+            if (currentExe != previousExe)
             {
                 PostMessage, 0x0050, 0, 0x00000409, , A ; ENG keyborad
                 previousExe := currentExe
                 return
-            } else 
+            } else
             {
                 return
             }
@@ -29,37 +29,36 @@ isActive:
             return
         }
     }
-
-~Esc & a::
-    ;open explorer.exe
-    Run, "explorer.exe"
+#q::
+    Send, ^+a
 return
 
+;F13
+F13::
+    Send {Esc}
+return
+
+F13 & a::
+;open explorer.exe
+Run, "explorer.exe"
+return
+F13 & t::
+Send \texttt
+return
 ;search google
 
-~Esc & s::
-    Send {ctrl down}c{ctrl up} 
-    Sleep 40
-    InputBox, OutputVar,Search, google search,,220,130,,,,,%clipboard%
-    if ErrorLevel
-        return
-    else if (Outputvar=="")
-        return
-    else
-        Run, https://www.google.com/search?q=%OutputVar%
+F13 & s::
+Send {ctrl down}c{ctrl up}
+Sleep 40
+InputBox, OutputVar,Search, google search,,220,130,,,,,%clipboard%
+if ErrorLevel
+    return
+else if (Outputvar=="")
+    return
+else
+    Run, https://www.google.com/search?q=%OutputVar%
 
 return
-
-
-; #+w:: 
-;     WinGetPos, X, Y, W, H, A
-;     MsgBox, The window is at %X%`,%Y% and its size is %W%x%H%
-; return
-
-#q:: 
-    Send, !+a
-return
-
 ;alt
 !.::
     Send, 2013599_Ìï¼ÑÒµ
@@ -73,6 +72,10 @@ return
     Send, ^!b
 return
 #z::
+    ; Send, ^!o
+    Send !+o
+return
+#!z::
     Send, ^!o
 return
 #+s::
@@ -82,12 +85,12 @@ return
 #UseHook On
 Setkeydelay, -1
 
-; It is used to record whether Chinese punctuation is used in the Chinese state of Sogou input method, Not used by default
-ime_us_cn_point := 0
+; It is used to record whether Chinese punctuation is used in the Chinese state of Sogou input method, used by default
+ime_us_cn_point := 1
 
 GetIME() ; {{{1
 { ; Gets the active ime language layout of the current window ID Interface, This interface is one of the few interfaces that can correctly query the input method language status
-return DllCall("GetKeyboardLayout", "UInt", DllCall("GetWindowThreadProcessId", "UInt", WinActive("A"), "UInt", 0), "UInt")
+    return DllCall("GetKeyboardLayout", "UInt", DllCall("GetWindowThreadProcessId", "UInt", WinActive("A"), "UInt", 0), "UInt")
 }
 
 SwitchIME() ; {{{1
@@ -136,13 +139,26 @@ SwitchUseEnPoint() ; {{{1
 Shift::SwitchIME() ; realization Shift Key switching Chinese and English input method
 ^.::SwitchUseEnPoint() ; realization Ctrl+. Toggle the "use English punctuation in Chinese" switch effect
 
+F13 & c::
+    cur_IME := GetIME()
+    SetIMEtoEn()
+    Send, {`` 3}C{+}{+}
+    Send, {enter}
+    sleep 10
+    if (cur_IME=0x8040804)
+        SetIMEtoCn()
+return
+::cccn::
+    Send aaa
+return
+
 ;typora
 #IfWinActive ahk_exe Typora.exe
     {
         #1::addFontColor("apricot")
         #2::addFontColor("green")
         #3::addFontColor("cornflowerblue")
-        #4::addFontColor("cyan") 
+        #4::addFontColor("cyan")
         #5::addFontColor("purple")
         !1::sendctrl(1)
         !2::sendctrl(2)
@@ -156,59 +172,59 @@ Shift::SwitchIME() ; realization Shift Key switching Chinese and English input m
 
     }
 
-    #IfWinActive ahk_exe Termius.exe
-        {
+#IfWinActive ahk_exe Termius.exe
+    {
 
-            Esc & q up::qqq()
-            Esc & w::wwwqqq()
+        Esc & q up::qqq()
+        Esc & w::wwwqqq()
 
+    }
+
+    qqq()
+    {
+        Send, :q
+        return
+    }
+
+    wwwqqq()
+    {
+        Send, :wq
+        return
+    }
+
+    addFontColor(color){
+        clipboard := ""
+        Send {ctrl down}c{ctrl up}
+        ; SendInput {Text}
+        SendInput {TEXT}<font color='%color%'>
+        SendInput {ctrl down}v{ctrl up}
+        If(clipboard = ""){
+            SendInput {TEXT}</font>
+        }else{
+            SendInput {TEXT}</
         }
+    }
+    addCodeshell(){
+        Sleep 30
+        Send,{Asc 096}
+        Send,{Asc 096}
+        Send,{Asc 096}
+        Send,sql
+        Send,{Enter}
+        Return
+    }
 
-        qqq()
-        {
-            Send, :q
-            return
-        }
+    addTitle(){
+        Send, ^5
+        Return
+    }
 
-        wwwqqq()
-        {
-            Send, :wq
-            return
-        }
+    sendctrl(num){
+        Send, ^%num%
+        Return
+    }
 
-        addFontColor(color){
-            clipboard := "" 
-            Send {ctrl down}c{ctrl up} 
-            ; SendInput {Text} 
-            SendInput {TEXT}<font color='%color%'>
-            SendInput {ctrl down}v{ctrl up}
-            If(clipboard = ""){
-                SendInput {TEXT}</font>
-            }else{
-                SendInput {TEXT}</ 
-            }
-        }
-        addCodeshell(){
-            Sleep 30
-            Send,{Asc 096}
-            Send,{Asc 096}
-            Send,{Asc 096}
-            Send,sql
-            Send,{Enter}
-            Return
-        } 
-
-        addTitle(){
-            Send, ^5
-            Return
-        } 
-
-        sendctrl(num){
-            Send, ^%num%
-            Return
-        }
-
-        addTitle6(){
-            Send, ^6
-            Return
-        }
+    addTitle6(){
+        Send, ^6
+        Return
+    }
